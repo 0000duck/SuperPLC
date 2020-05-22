@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>wangzhen</Authors>
+    <Description>PLC读写类</Description>
+    <RepositoryUrl>https://github.com/yuezhuosuigu-cs/SuperPLC.git</RepositoryUrl>
+  </PropertyGroup>
+
+</Project>
