@@ -5,6 +5,7 @@
     <Authors>wangzhen</Authors>
     <Description>PLC读写类</Description>
     <RepositoryUrl>https://github.com/yuezhuosuigu-cs/SuperPLC.git</RepositoryUrl>
+    <Version>2.0.0</Version>
   </PropertyGroup>
 
 </Project>
