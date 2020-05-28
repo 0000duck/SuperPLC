@@ -36,7 +36,7 @@ namespace S7.Net
         /// Slot of the CPU of the plc
         /// </summary>
         public Int16 Slot { get; private set; }
-        
+
         /// <summary>
         /// Pings the IP address and returns true if the result of the ping is Success.
         /// </summary>
@@ -76,7 +76,7 @@ namespace S7.Net
                 try
                 {
                     if (_mSocket == null)
-                        return false;                 
+                        return false;
 
                     return !((_mSocket.Poll(1000, SelectMode.SelectRead) && (_mSocket.Available == 0)) || !_mSocket.Connected);
                 }
@@ -93,7 +93,7 @@ namespace S7.Net
         /// Contains the last error code registered when executing a function
         /// </summary>
         public ErrorCode LastErrorCode { get; private set; }
-        
+
         /// <summary>
         /// Creates a PLC object with all the parameters needed for connections.
         /// For S7-1200 and S7-1500, the default is rack = 0 and slot = 0.
@@ -121,7 +121,7 @@ namespace S7.Net
         {
             byte[] bReceive = new byte[256];
 
-            try 
+            try
             {
                 // check if available
                 if (!IsAvailable)
@@ -129,7 +129,7 @@ namespace S7.Net
                     throw new Exception();
                 }
             }
-            catch  
+            catch
             {
                 LastErrorCode = ErrorCode.IPAddressNotAvailable;
                 LastErrorString = string.Format("Destination IP-Address '{0}' is not available!", IP);
@@ -151,7 +151,7 @@ namespace S7.Net
                 return ErrorCode.ConnectionError;
             }
 
-            try 
+            try
             {
                 byte[] bSend1 = { 3, 0, 0, 22, 17, 224, 0, 0, 0, 46, 0, 193, 2, 1, 0, 194, 2, 3, 0, 192, 1, 9 };
 
@@ -214,7 +214,7 @@ namespace S7.Net
                 if (_mSocket.Receive(bReceive, 22, SocketFlags.None) != 22)
                 {
                     throw new Exception(ErrorCode.WrongNumberReceivedBytes.ToString());
-                } 
+                }
 
                 byte[] bsend2 = { 3, 0, 0, 25, 2, 240, 128, 50, 1, 0, 0, 255, 255, 0, 8, 0, 0, 240, 0, 0, 3, 0, 3, 1, 0 };
                 _mSocket.Send(bsend2, 25, SocketFlags.None);
@@ -222,9 +222,9 @@ namespace S7.Net
                 if (_mSocket.Receive(bReceive, 27, SocketFlags.None) != 27)
                 {
                     throw new Exception(ErrorCode.WrongNumberReceivedBytes.ToString());
-                } 
+                }
             }
-            catch(Exception exc)
+            catch (Exception exc)
             {
                 LastErrorCode = ErrorCode.ConnectionError;
                 LastErrorString = "Couldn't establish the connection to " + IP + ".\nMessage: " + exc.Message;
@@ -239,7 +239,7 @@ namespace S7.Net
         /// </summary>
         public void Close()
         {
-            if (_mSocket != null && _mSocket.Connected) 
+            if (_mSocket != null && _mSocket.Connected)
             {
                 _mSocket.Shutdown(SocketShutdown.Both);
                 _mSocket.Close();
@@ -257,14 +257,14 @@ namespace S7.Net
         public void ReadMultipleVars(List<DataItem> dataItems)
         {
             int cntBytes = dataItems.Sum(dataItem => VarTypeToByteLength(dataItem.VarType, dataItem.Count));
-            
+
             if (dataItems.Count > 20) throw new Exception("Too many vars requested");
             if (cntBytes > 222) throw new Exception("Too many bytes requested"); //todo, proper TDU check + split in multiple requests
 
             try
             {
                 // first create the header
-                int packageSize = 19 + (dataItems.Count*12);
+                int packageSize = 19 + (dataItems.Count * 12);
                 Types.ByteArray package = new ByteArray(packageSize);
                 package.Add(ReadHeaderPackage(dataItems.Count));
                 // package.Add(0x02);  // datenart
@@ -306,7 +306,7 @@ namespace S7.Net
                 LastErrorString = exc.Message;
             }
         }
-        
+
         /// <summary>
         /// Reads a number of bytes from a DB starting from a specified index. This handles more than 200 bytes with multiple requests.
         /// If the read was not successful, check LastErrorCode or LastErrorString.
@@ -349,7 +349,7 @@ namespace S7.Net
             byte[] bytes = ReadBytes(dataType, db, startByteAdr, cntBytes);
             return ParseBytes(varType, bytes, varCount);
         }
-        
+
         /// <summary>
         /// Reads a single variable from the plc, takes in input strings like "DB1.DBX0.0", "DB20.DBD200", "MB20", "T45", etc.
         /// If the read was not successful, check LastErrorCode or LastErrorString.
@@ -486,11 +486,11 @@ namespace S7.Net
                         mBit = int.Parse(txt2.Substring(txt2.IndexOf(".") + 1));
                         if (mBit > 7) throw new Exception();
                         var obj3 = (byte)Read(mDataType, 0, mByte, VarType.Byte, 1);
-                        objBoolArray = new BitArray(new byte[]{obj3});
+                        objBoolArray = new BitArray(new byte[] { obj3 });
                         return objBoolArray[mBit];
                 }
             }
-            catch 
+            catch
             {
                 LastErrorCode = ErrorCode.WrongVarFormat;
                 LastErrorString = "The variable'" + variable + "' could not be read. Please check the syntax and try again.";
@@ -574,6 +574,9 @@ namespace S7.Net
 
             switch (value.GetType().Name)
             {
+                case "Single":
+                    package = Types.Double.ToByteArray((float)value);
+                    break;
                 case "Byte":
                     package = Types.Byte.ToByteArray((byte)value);
                     break;
@@ -808,7 +811,7 @@ namespace S7.Net
         public ErrorCode WriteStruct(object structValue, int db, int startByteAdr = 0)
         {
             var bytes = Types.Struct.ToBytes(structValue).ToList();
-            var errCode = WriteBytes(DataType.DataBlock ,db, startByteAdr, bytes.ToArray());
+            var errCode = WriteBytes(DataType.DataBlock, db, startByteAdr, bytes.ToArray());
             return errCode;
         }
 
